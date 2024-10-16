@@ -8,7 +8,7 @@ import { Checkbox } from "@/app/components/ui/checkbox"
 import { Select, SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue, SelectGroup, SelectLabel } from "@/app/components/ui/select"
+  SelectValue, SelectGroup } from "@/app/components/ui/select"
 import { Label } from "@/app/components/ui/label"
 import {PlusCircle, X} from "lucide-react";
 import {Textarea} from "@/app/components/ui/textarea"
@@ -20,7 +20,7 @@ type PersonFormProps = {
 };
 
 export const PersonForm: React.FC<PersonFormProps> = ({ onSubmit, initialData }) => {
-  const { control, handleSubmit, watch, reset, formState: { errors, isValid } } = useForm<PersonSchema>({
+  const { control, handleSubmit, watch, reset, formState: { errors } } = useForm<PersonSchema>({
     resolver: yupResolver(personSchema),
     mode: 'onChange',
     defaultValues: {
@@ -61,12 +61,6 @@ export const PersonForm: React.FC<PersonFormProps> = ({ onSubmit, initialData })
     }
   }, [hasFarm, crops, appendCrop]);
 
-
-  useEffect(() => {
-    if (Object.keys(errors).length > 0) {
-      console.log('Form Errors:', errors);
-    }
-  }, [errors]);
 
   const onSubmitWrapper = (data: PersonSchema) => {
     onSubmit(data);

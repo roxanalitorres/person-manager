@@ -61,6 +61,7 @@ export default function PersonManager() {
         description: editingPerson ? "Person updated successfully" : "Person created successfully",
       })
     } catch (error) {
+      console.error('Error update person:', error);
       toast({
         title: "Error",
         description: `Failed to ${editingPerson ? 'update' : 'create'} person. Please try again.`,
