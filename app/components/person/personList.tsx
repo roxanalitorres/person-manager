@@ -1,16 +1,11 @@
 import React from 'react';
 import { Button } from "@/app/components/ui/button"
+import {PersonSchema} from "@/schemas/personSchema";
 
-type Person = {
-  id: string;
-  name: string;
-  lastName: string;
-  ci: string;
-};
 
 type PersonListProps = {
-  persons: Person[];
-  onEdit: (person: Person) => void;
+  persons: PersonSchema[];
+  onEdit: (person: PersonSchema) => void;
   onDelete: (id: string) => void;
 };
 
@@ -25,7 +20,7 @@ export const PersonList: React.FC<PersonListProps> = ({ persons, onEdit, onDelet
           </div>
           <div className="space-x-2">
             <Button onClick={() => onEdit(person)} variant="outline">Editar</Button>
-            <Button onClick={() => onDelete(person.id)} variant="destructive">Eliminar</Button>
+            <Button onClick={() => onDelete(person._id)} variant="destructive">Eliminar</Button>
           </div>
         </div>
       ))}

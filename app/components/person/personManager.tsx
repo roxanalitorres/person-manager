@@ -4,10 +4,18 @@ import React, { useState, useEffect } from 'react';
 import { PersonForm } from '@/app/components/person/personForm';
 import { PersonList } from '@/app/components/person/personList';
 import { Button } from "@/app/components/ui/button"
+import {PersonSchema} from "@/schemas/personSchema";
+
+import {useToast} from "@/hooks/use-toast";
+import {Toaster} from "@/app/components/ui/toaster";
+
 
 export default function PersonManager() {
   const [persons, setPersons] = useState([]);
-  const [editingPerson, setEditingPerson] = useState(null);
+  const [editingPerson, setEditingPerson] = useState<PersonSchema | null>(null);
+  const { toast } = useToast()
+  // forces React to unmount and remount the form
+  const [key, setKey] = useState(0);
 
   useEffect(() => {
     fetchPersons();
@@ -19,45 +27,92 @@ export default function PersonManager() {
     setPersons(data);
   };
 
-  const handleSubmit = async (data: any) => {
-    console.log('hizo submit')
-    if (editingPerson) {
-      await fetch(`/api/persons/${editingPerson.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-    } else {
-      await fetch('/api/persons', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
+  const handleSubmit = async (data: PersonSchema) => {
+    try {
+      let response;
+      if (editingPerson) {
+
+        const personId = editingPerson._id;
+
+        if (!personId) {
+          throw new Error('Invalid person ID');
+        }
+        response = await fetch(`/api/persons/${personId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+      }else {
+        response = await fetch('/api/persons', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+      }
+      if (!response.ok) {
+        throw new Error('Failed to save person');
+      }
+      await fetchPersons();
+      setEditingPerson(null);
+      setKey(prevKey => prevKey + 1);
+
+      toast({
+        title: "Success",
+        description: editingPerson ? "Person updated successfully" : "Person created successfully",
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to ${editingPerson ? 'update' : 'create'} person. Please try again.`,
+        variant: "destructive",
+      })
     }
-    fetchPersons();
-    setEditingPerson(null);
   };
 
-  const handleEdit = (person) => {
+  const handleEdit = (person : PersonSchema) => {
     setEditingPerson(person);
+    setKey(prevKey => prevKey + 1);
   };
 
-  const handleDelete = async (id) => {
-    await fetch(`/api/persons/${id}`, { method: 'DELETE' });
-    fetchPersons();
+  const handleDelete = async (id: string) => {
+    try {
+      const response = await fetch(`/api/persons/${id}`, { method: 'DELETE' });
+      if (!response.ok) {
+        throw new Error('Failed to delete person');
+      }
+      await fetchPersons();
+      toast({
+        title: "Success",
+        description: "Person deleted successfully",
+      })
+    } catch (error) {
+      console.error('Error deleting person:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete person. Please try again.",
+        variant: "destructive",
+      })
+    }
+  };
+  const handleCancelEdit = () => {
+    setEditingPerson(null);
+    setKey(prevKey => prevKey + 1);
   };
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Gestión de Personas</h1>
-      <PersonForm onSubmit={handleSubmit} />
+      <h1 className="text-2xl font-bold mb-4">
+        {editingPerson ? 'Editar Persona' : 'Crear Nueva Persona'}
+      </h1>
+      <PersonForm  key={key} onSubmit={handleSubmit} initialData={editingPerson}/>
+      {editingPerson && (
+        <Button onClick={handleCancelEdit} className="mt-4">Cancelar Edición</Button>
+      )}
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-2">Lista de Personas</h2>
-        <PersonList persons={persons} onEdit={handleEdit} onDelete={handleDelete} />
+        <PersonList persons={persons} onEdit={handleEdit} onDelete={handleDelete}/>
       </div>
-      {editingPerson && (
-        <Button onClick={() => setEditingPerson(null)} className="mt-4">Cancelar Edición</Button>
-      )}
+      <Toaster />
     </div>
   );
 }

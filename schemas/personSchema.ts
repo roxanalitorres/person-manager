@@ -27,7 +27,7 @@ export const personSchema = Yup.object().shape({
       if (!value) return false;
       return isOver18(new Date(value));
     }),
-  hasRuc: Yup.boolean().required('Debe especificar si tiene RUC'),
+  hasRuc: Yup.boolean().required('Debe especificar si tiene RUC').defined(),
   rucNumber: Yup.string().when('hasRuc', {
     is: true,
     then: (schema) =>
@@ -37,7 +37,7 @@ export const personSchema = Yup.object().shape({
     otherwise: (schema) => schema.notRequired(),
   }),
   gender: Yup.string().oneOf(['male', 'female', 'other'], 'Género inválido').required('El género es requerido'),
-  hasFarm: Yup.boolean().required('Debe especificar si tiene granja'),
+  hasFarm: Yup.boolean().required('Debe especificar si tiene granja').defined(),
   farmHa: Yup.number().when('hasFarm', {
     is: true,
     then: (schema) => schema.required('El tamaño de la granja es requerido cuando hasFarm es true')
@@ -62,7 +62,7 @@ export const personSchema = Yup.object().shape({
     .min(1, 'Debe incluir al menos un miembro de la familia')
     .max(10, 'No puede incluir más de 10 miembros de la familia'),
 
-  hasWorkers: Yup.boolean().required('Debe especificar si tiene trabajadores'),
+  hasWorkers: Yup.boolean().required('Debe especificar si tiene trabajadores').defined(),
   totalWorkers: Yup.number().when('hasWorkers', {
     is: true,
     then: (schema) => schema
@@ -75,7 +75,7 @@ export const personSchema = Yup.object().shape({
   over18Workers: Yup.number().min(0, 'El número de trabajadores mayores de 18 no puede ser negativo'),
   under18Workers: Yup.number().min(0, 'El número de trabajadores menores de 18 no puede ser negativo'),
   minorWorkersOcuppacion: Yup.string(),
-  hasPregnandWorkers: Yup.boolean().required('Debe especificar si tiene trabajadoras embarazadas'),
+  hasPregnandWorkers: Yup.boolean().required('Debe especificar si tiene trabajadoras embarazadas').defined(),
   pregnandWorkers: Yup.number().when('hasPregnandWorkers', {
     is: true,
     then: (schema) => schema
