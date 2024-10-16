@@ -13,6 +13,7 @@ const familyMemberSchema = Yup.object().shape({
 });
 
 export const personSchema = Yup.object().shape({
+  _id: Yup.string().optional(),
   name: Yup.string().required('El nombre es requerido'),
   lastName: Yup.string().required('El apellido es requerido'),
   ci: Yup.string()
