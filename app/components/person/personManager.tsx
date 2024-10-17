@@ -5,6 +5,7 @@ import { PersonForm } from '@/app/components/person/personForm';
 import { PersonList } from '@/app/components/person/personList';
 import { Button } from "@/app/components/ui/button"
 import {PersonSchema} from "@/schemas/personSchema";
+import { Skeleton} from "@/app/components/ui/skeleton";
 
 import {useToast} from "@/hooks/use-toast";
 import {Toaster} from "@/app/components/ui/toaster";
@@ -14,6 +15,7 @@ export default function PersonManager() {
   const [persons, setPersons] = useState([]);
   const [editingPerson, setEditingPerson] = useState<PersonSchema | null>(null);
   const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(true);
   // forces React to unmount and remount the form
   const [key, setKey] = useState(0);
 
@@ -22,9 +24,23 @@ export default function PersonManager() {
   }, []);
 
   const fetchPersons = async () => {
-    const response = await fetch('/api/persons');
-    const data = await response.json();
-    setPersons(data);
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/persons');
+      if (!response.ok) {
+        throw new Error('Failed to fetch persons');
+      }
+      const data = await response.json();
+      setPersons(data);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to fetch persons: ${error}.`,
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSubmit = async (data: PersonSchema) => {
@@ -111,7 +127,15 @@ export default function PersonManager() {
       )}
       <div className="mt-8">
         <h2 className="text-xl font-semibold mb-2">Lista de Personas</h2>
-        <PersonList persons={persons} onEdit={handleEdit} onDelete={handleDelete}/>
+        {isLoading ? (
+          <div className="space-y-2">
+            {[...Array(5)].map((_, index) => (
+              <Skeleton key={index} className="h-12 w-full" />
+            ))}
+          </div>
+        ) : (
+          <PersonList persons={persons} onEdit={handleEdit} onDelete={handleDelete} />
+        )}
       </div>
       <Toaster />
     </div>

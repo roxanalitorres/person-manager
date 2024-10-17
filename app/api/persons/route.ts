@@ -9,7 +9,6 @@ export async function GET() {
     const persons = await Person.find({});
     return NextResponse.json(persons);
   } catch (error) {
-    console.error('Error en GET /api/persons:', error);
     return NextResponse.json({ error: error }, { status: 500 });
   }
 }
@@ -21,7 +20,6 @@ export async function POST(request: NextRequest) {
     const person = await Person.create(body);
     return NextResponse.json(person, { status: 201 });
   } catch (error) {
-    console.error('Error en POST /api/persons:', error);
     return NextResponse.json({ error: error }, { status: 400 });
   }
 }
