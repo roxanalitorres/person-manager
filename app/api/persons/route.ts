@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import Person from '@/models/person';
-import dbConnect from '@/lib/mongodb';
+import  { dbConnect } from '@/lib/mongodb';
 
 export async function GET() {
   await dbConnect();
